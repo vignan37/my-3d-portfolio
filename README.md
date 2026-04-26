@@ -157,19 +157,32 @@ You can adapt this portfolio to your own profile by updating the following areas
 
 ## Deployment
 
-1. Create a production build:
+### GitHub Pages
 
-   ```bash
-   npm run build
+1. Update `vite.config.ts` base to your repository name:
+
+   ```ts
+   export default defineConfig({
+     plugins: [react()],
+     base: "/my-3d-portfolio/",
+   });
    ```
 
-2. Validate locally:
+2. Build and publish to the `gh-pages` branch:
 
    ```bash
-   npm run preview
+   npm run deploy
    ```
 
-3. Deploy the generated `dist/` folder to your hosting provider (for example Vercel, Netlify, or Cloudflare Pages).
+3. In your repository settings, open **Pages** and set:
+   - Source: **Deploy from a branch**
+   - Branch: `gh-pages` / root
+
+4. Your portfolio will be available at:
+
+   ```text
+   https://<your-username>.github.io/my-3d-portfolio/
+   ```
 
 ## License
 
