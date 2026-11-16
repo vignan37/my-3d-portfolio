@@ -1,6 +1,5 @@
 
 import "./styles/TechStack.css";
-import type { IconType } from "react-icons";
 import {
   SiJavascript,
   SiTypescript,
@@ -24,12 +23,6 @@ import {
 } from "react-icons/si";
 import { FaJava } from "react-icons/fa";
 
-
-type Skill = {
-  name: string;
-  icon?: IconType;
-  color: string;
-};
 
 const groups = [
   {
