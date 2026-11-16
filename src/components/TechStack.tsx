@@ -1,280 +1,119 @@
-import * as THREE from "three";
-import { useRef, useMemo, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
-import { EffectComposer, N8AO } from "@react-three/postprocessing";
+
+import "./styles/TechStack.css";
+import type { IconType } from "react-icons";
 import {
-  BallCollider,
-  Physics,
-  RigidBody,
-  CylinderCollider,
-  RapierRigidBody,
-} from "@react-three/rapier";
+  SiJavascript,
+  SiTypescript,
+  SiPython,
+  SiAngular,
+  SiReact,
+  SiSpringboot,
+  SiDotnet,
+  SiNodedotjs,
+  SiMysql,
+  SiMongodb,
+  SiGit,
+  SiGithub,
+  SiPostman,
+  SiJenkins,
+  SiDocker,
+  SiGitlab,
+  SiLinux,
+  SiJasmine,
+  SiAnthropic,
+} from "react-icons/si";
+import { FaJava } from "react-icons/fa";
 
-const textureLoader = new THREE.TextureLoader();
-const baseUrl = import.meta.env.BASE_URL;
-const imageUrls = [
-  `${baseUrl}images/react2.webp`,
-  `${baseUrl}images/next2.webp`,
-  `${baseUrl}images/node2.webp`,
-  `${baseUrl}images/express.webp`,
-  `${baseUrl}images/mongo.webp`,
-  `${baseUrl}images/mysql.webp`,
-  `${baseUrl}images/typescript.webp`,
-  `${baseUrl}images/javascript.webp`,
-];
-const textures = imageUrls.map((url) => textureLoader.load(url));
 
-const techStackGroups = [
-  {
-    title: "Frontend",
-    items: [
-      "Angular (Expert)",
-      "TypeScript",
-      "JavaScript (ES6+)",
-      "RxJS",
-      "NgRx",
-      "HTML5",
-      "CSS3",
-      "React (Basic)",
-    ],
-  },
-  {
-    title: "Backend",
-    items: ["Java (Core)", "Spring Boot", ".NET Core", "Node.js (Basic)"],
-  },
-  {
-    title: "Databases",
-    items: ["MySQL", "MongoDB", "SQL (Query Optimization, Joins)"],
-  },
-  {
-    title: "Architecture & Concepts",
-    items: [
-      "REST APIs",
-      "State Management (NgRx)",
-      "Microservices (Basic understanding)",
-      "System Design Fundamentals",
-      "Performance Optimization",
-    ],
-  },
-  {
-    title: "Testing & Quality",
-    items: [
-      "Jasmine / Karma",
-      "Unit Testing",
-      "Test Coverage Optimization",
-      "Debugging & Performance Profiling",
-    ],
-  },
-  {
-    title: "DevOps & Tools",
-    items: [
-      "Git / GitLab",
-      "CI/CD Pipelines",
-      "Jenkins",
-      "IIS",
-      "Chrome DevTools",
-    ],
-  },
-];
-
-const sphereGeometry = new THREE.SphereGeometry(1, 28, 28);
-
-const spheres = [...Array(30)].map(() => ({
-  scale: [0.7, 1, 0.8, 1, 1][Math.floor(Math.random() * 5)],
-}));
-
-type SphereProps = {
-  vec?: THREE.Vector3;
-  scale: number;
-  r?: typeof THREE.MathUtils.randFloatSpread;
-  material: THREE.MeshPhysicalMaterial;
-  isActive: boolean;
+type Skill = {
+  name: string;
+  icon?: IconType;
+  color: string;
 };
 
-function SphereGeo({
-  vec = new THREE.Vector3(),
-  scale,
-  r = THREE.MathUtils.randFloatSpread,
-  material,
-  isActive,
-}: SphereProps) {
-  const api = useRef<RapierRigidBody | null>(null);
+const groups = [
+  {
+    title: "Programming",
+    skills: [
+      { name: "Java", icon: FaJava, color: "#E76F00" },
+      { name: "JavaScript", icon: SiJavascript, color: "#F7DF1E" },
+      { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
+      { name: "Python", icon: SiPython, color: "#3776AB" },
+    ],
+  },
+  {
+    title: "Frontend & Backend",
+    skills: [
+      { name: "Angular", icon: SiAngular, color: "#DD0031" },
+      { name: "React", icon: SiReact, color: "#61DAFB" },
+      { name: "Spring Boot", icon: SiSpringboot, color: "#6DB33F" },
+      { name: ".NET", icon: SiDotnet, color: "#512BD4" },
+      { name: "Node.js", icon: SiNodedotjs, color: "#339933" },
+      { name: "RxJS", icon: SiReact, color: "#B7178C" },
+      { name: "NgRx", color: "#BA2BD2" },
+    ],
+  },
+  {
+    title: "Database & Tools",
+    skills: [
+      { name: "MySQL", icon: SiMysql, color: "#4479A1" },
+      { name: "MongoDB", icon: SiMongodb, color: "#47A248" },
+      { name: "Git", icon: SiGit, color: "#F05032" },
+      { name: "GitHub", icon: SiGithub, color: "#FFFFFF" },
+      { name: "Postman", icon: SiPostman, color: "#FF6C37" },
+      { name: "Jenkins", icon: SiJenkins, color: "#D24939" },
+      { name: "Docker", icon: SiDocker, color: "#2496ED" },
+      { name: "Claude AI", icon: SiAnthropic, color: "#D97757" },
+    ],
+  },
+  {
+    title: "Deployment & Engineering",
+    skills: [
+      { name: "GitLab CI/CD", icon: SiGitlab, color: "#FC6D26" },
+      { name: "Linux", icon: SiLinux, color: "#FCC624" },
+      { name: "Playwright", icon: FaJava, color: "#2EAD33" },
+      { name: "Jasmine", icon: SiJasmine, color: "#8A4182" },
+    ],
+  },
+];
 
-  useFrame((_state, delta) => {
-    if (!isActive) return;
-    delta = Math.min(0.1, delta);
-    const impulse = vec
-      .copy(api.current!.translation())
-      .normalize()
-      .multiply(
-        new THREE.Vector3(
-          -50 * delta * scale,
-          -150 * delta * scale,
-          -50 * delta * scale
-        )
-      );
-
-    api.current?.applyImpulse(impulse, true);
-  });
-
+export default function TechStack() {
   return (
-    <RigidBody
-      linearDamping={0.75}
-      angularDamping={0.15}
-      friction={0.2}
-      position={[r(20), r(20) - 25, r(20) - 10]}
-      ref={api}
-      colliders={false}
-    >
-      <BallCollider args={[scale]} />
-      <CylinderCollider
-        rotation={[Math.PI / 2, 0, 0]}
-        position={[0, 0, 1.2 * scale]}
-        args={[0.15 * scale, 0.275 * scale]}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        scale={scale}
-        geometry={sphereGeometry}
-        material={material}
-        rotation={[0.3, 1, 1]}
-      />
-    </RigidBody>
-  );
-}
+    <section className="techstack" id="tech-stack">
+      <h1 className="techstack-title">Skills & Technologies</h1>
 
-type PointerProps = {
-  vec?: THREE.Vector3;
-  isActive: boolean;
-};
-
-function Pointer({ vec = new THREE.Vector3(), isActive }: PointerProps) {
-  const ref = useRef<RapierRigidBody>(null);
-
-  useFrame(({ pointer, viewport }) => {
-    if (!isActive) return;
-    const targetVec = vec.lerp(
-      new THREE.Vector3(
-        (pointer.x * viewport.width) / 2,
-        (pointer.y * viewport.height) / 2,
-        0
-      ),
-      0.2
-    );
-    ref.current?.setNextKinematicTranslation(targetVec);
-  });
-
-  return (
-    <RigidBody
-      position={[100, 100, 100]}
-      type="kinematicPosition"
-      colliders={false}
-      ref={ref}
-    >
-      <BallCollider args={[2]} />
-    </RigidBody>
-  );
-}
-
-const TechStack = () => {
-  const [isActive, setIsActive] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      const threshold = document
-        .getElementById("work")!
-        .getBoundingClientRect().top;
-      setIsActive(scrollY > threshold);
-    };
-    document.querySelectorAll(".header a").forEach((elem) => {
-      const element = elem as HTMLAnchorElement;
-      element.addEventListener("click", () => {
-        const interval = setInterval(() => {
-          handleScroll();
-        }, 10);
-        setTimeout(() => {
-          clearInterval(interval);
-        }, 1000);
-      });
-    });
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-  const materials = useMemo(() => {
-    return textures.map(
-      (texture) =>
-        new THREE.MeshPhysicalMaterial({
-          map: texture,
-          emissive: "#ffffff",
-          emissiveMap: texture,
-          emissiveIntensity: 0.3,
-          metalness: 0.5,
-          roughness: 1,
-          clearcoat: 0.1,
-        })
-    );
-  }, []);
-
-  return (
-    <div className="techstack">
-      <h2>My Tech Stack</h2>
-      <div className="techstack-groups">
-        {techStackGroups.map((group) => (
-          <div className="techstack-group" key={group.title}>
+      <div className="techstack-content">
+        {groups.map((group) => (
+          <div className="techstack-category" key={group.title}>
             <h3>{group.title}</h3>
-            <div className="techstack-tags">
-              {group.items.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
+
+            <div className="techstack-skills">
+              {group.skills.map((skill) => {
+                const Icon = skill.icon;
+
+                return (
+                  <div className="techstack-skill" key={skill.name}>
+                    {Icon ? (
+                      <Icon
+                        className="techstack-logo"
+                        style={{ color: skill.color }}
+                      />
+                    ) : (
+                      <span
+                        className="techstack-logo text-logo"
+                        style={{ color: skill.color }}
+                      >
+                        Ng
+                      </span>
+                    )}
+                    <span>{skill.name}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
-
-      <Canvas
-        shadows
-        gl={{ alpha: true, stencil: false, depth: false, antialias: false }}
-        camera={{ position: [0, 0, 20], fov: 32.5, near: 1, far: 100 }}
-        onCreated={(state) => (state.gl.toneMappingExposure = 1.5)}
-        className="tech-canvas"
-      >
-        <ambientLight intensity={1} />
-        <spotLight
-          position={[20, 20, 25]}
-          penumbra={1}
-          angle={0.2}
-          color="white"
-          castShadow
-          shadow-mapSize={[512, 512]}
-        />
-        <directionalLight position={[0, 5, -4]} intensity={2} />
-        <Physics gravity={[0, 0, 0]}>
-          <Pointer isActive={isActive} />
-          {spheres.map((props, i) => (
-            <SphereGeo
-              key={i}
-              {...props}
-              material={materials[Math.floor(Math.random() * materials.length)]}
-              isActive={isActive}
-            />
-          ))}
-        </Physics>
-        <Environment
-          files={`${baseUrl}models/char_enviorment.hdr`}
-          environmentIntensity={0.5}
-          environmentRotation={[0, 4, 2]}
-        />
-        <EffectComposer enableNormalPass={false}>
-          <N8AO color="#0f002c" aoRadius={2} intensity={1.15} />
-        </EffectComposer>
-      </Canvas>
-    </div>
+    </section>
   );
-};
-
-export default TechStack;
+}
